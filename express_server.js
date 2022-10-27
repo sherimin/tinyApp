@@ -39,7 +39,12 @@ app.get('/u/:shortURL', (req, res) => {
   }
 })
 
-
+//to remove a URL resource and redirect to index page
+app.post("/urls/:id/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+});
 
 
 
