@@ -16,6 +16,9 @@ app.get("/urls", (req, res) => {
 
 //Generate short URLs and redirect
 app.post("/urls", (req, res) => {
+  function generateRandomString() {
+    return Math.random().toString(36).slice(2,8);
+  };
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
@@ -26,7 +29,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: `urlDatabase`/* What goes here? */ };
+  const templateVars = { shortURL: req.params.id, longURL: `urlDatabase`};
   res.render("urls_show", templateVars);
 });
 
@@ -35,15 +38,25 @@ app.get('/u/:shortURL', (req, res) => {
   if (longURL) {
     res.redirect(urlDatabase[req.params.shortURL]);
   } else {
-    res.send(`The ID does not exist.`)
+    res.send(`The URL does not exist.`)
   }
 })
+
+//to update a longURL resource
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
 
 //to remove a URL resource and redirect to index page
 app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  res.redirect(`/urls`);
 });
 
 
@@ -58,6 +71,12 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+
+//Server Listen
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -66,6 +85,4 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-function generateRandomString() {
-    return Math.random().toString(36).slice(2,8);
-}
+
