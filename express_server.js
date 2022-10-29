@@ -1,6 +1,9 @@
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
+
+//app.use(cookieParser);
 
 //POST request
 app.use(express.urlencoded({ extended: true }));
@@ -54,11 +57,24 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //to remove a URL resource and redirect to index page
 app.post("/urls/:id/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  //const shortURL = req.params.shortURL;
+  delete urlDatabase[req.params.shortURL];
   res.redirect(`/urls`);
 });
 
+//User login
+app.post("/urls", (req, res) => {
+  const username = req.params.username
+  res.cookie('username', '/urls')
+  res.redirect(`/urls`)
+})
+
+app.get("urls/new", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_index", templateVars)
+})
 
 
 //original database
