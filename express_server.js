@@ -15,15 +15,12 @@ app.set('view engine', 'ejs');
 
 //pass the URL data to template
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  const templateVars = { urls: urlDatabase, username: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
 });
 
 //Generate short URLs and redirect
 app.post("/urls", (req, res) => {
-  function generateRandomString() {
-    return Math.random().toString(36).slice(2,8);
-  };
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
@@ -31,12 +28,12 @@ app.post("/urls", (req, res) => {
 
 //Create new urls
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies['username']};
+  const templateVars = { username: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { shortURL: req.params.id, longURL: `urlDatabase`, username: req.cookies['username']};
+  const templateVars = { shortURL: req.params.id, longURL: `urlDatabase`, username: users[req.cookies['user_id']]};
   res.render("urls_show", templateVars);
 });
 
@@ -64,10 +61,6 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//create database for user info
-const users = {
-
-};
 
 //User login
 app.post("/login", (req, res) => {
@@ -91,14 +84,53 @@ app.post("/logout", (req, res) => {
 
 //user registration
 app.get("/register", (req, res) => {
-  const templateVars = { username: users[req.cookies['username']]};
-  res.render("login", templateVars);
+  const templateVars = { username: users[req.cookies['user_id']]};
+  res.render("register", templateVars);
+  res.redirect('/urls/register');
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { username: users[req.cookies['username']]};
+  const templateVars = { username: users[req.cookies['user_id']]};
   res.render("login", templateVars);
+  res.redirect('/urls/login')
 })
+
+//Registration handler
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+
+  if (!req.body.email || !req.body.password) {
+    res.status(400);
+    return;
+  }
+
+  if ((users[req.body.email]) > -1) {
+    res.status(400);
+    return;
+  }
+
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+
+
+  //console.log for testing
+  //console.log(users);
+
+  //create user cookie
+  res.cookie('user_id', userID);
+  res.redirect(`/urls`);
+
+  //delete user cookie
+  app.post('/logout', (req, res) => {
+    res.clearCookie('user_id');
+    res.redirect('/urls');
+  })
+})
+
+
 
 
 //original database
@@ -106,6 +138,27 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+function generateRandomString() {
+  return Math.random().toString(36).slice(2,8);
+};
+
+//create database for user info
+const users = {
+  userExample: {
+    id: "userExampleID",
+    email: "user@example.com",
+    password: "example",
+  },
+
+  userTwoExample: {
+    id: "userTwoExample",
+    email: "user2@example.com",
+    password: "Example",
+  },
+
+};
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");

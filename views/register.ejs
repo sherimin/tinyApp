@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -19,23 +18,22 @@
     <body>
         
         <%- include('partials/_header') %>
-        <div style="display: block; margin: 0 auto; width: 50%"></div>
-        <h2>User Login Page</h2>
+        <h2>User Registration Form</h2>
         <br>
         
         <div class="form-group">
-            <form style="margin: 0 auto;" action="/register" method="POST">
-                <label for="username"> Email : </label>
-                <input type="email" name="email" placeholder="Enter email as username" />
-                </br>
-                <label for="password"> Password : </label>
-                <input type="password" name="password" placeholder="Enter password" />
-                </br>
-                <button type="submit" class="btn btn-outline-success" a href="/login"> Submit</button>
-    
-            </form>
-        </div>
+        <form style="margin: 0 auto;" action="/register" method="POST">
+            <label for="username"> Email : </label>
+            <input type="email" name="email" placeholder="Enter email as username" />
+            </br>
+            <label for="password"> Password : </label>
+            <input type="password" name="password" placeholder="Enter password" />
+            </br>
+            <button type="submit" class="btn btn-outline-primary" a href="/register"> Submit</button>
 
+        </form>
+        </div>
+    
      <!-- Bootstrap JS -->
      <script
      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
