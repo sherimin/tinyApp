@@ -66,7 +66,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
-  res.redirect(`/urls`);
+  res.redirect(`/login`);
 })
 
 app.get("urls/new", (req, res) => {
@@ -84,51 +84,49 @@ app.post("/logout", (req, res) => {
 
 //user registration
 app.get("/register", (req, res) => {
+  const userID = req.cookies["user_id"];
   const templateVars = { username: users[req.cookies['user_id']]};
   res.render("register", templateVars);
-  res.redirect('/urls/register');
 });
 
+//user login
 app.get("/login", (req, res) => {
   const templateVars = { username: users[req.cookies['user_id']]};
   res.render("login", templateVars);
-  res.redirect('/urls/login')
 })
 
 //Registration handler
 app.post("/register", (req, res) => {
-  const userID = generateRandomString();
-
-  if (!req.body.email || !req.body.password) {
-    res.status(400);
-    return;
-  }
-
-  if ((users[req.body.email]) > -1) {
-    res.status(400);
-    return;
-  }
-
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
-  }
-
-
   //console.log for testing
   //console.log(users);
 
-  //create user cookie
-  res.cookie('user_id', userID);
-  res.redirect(`/urls`);
+  //if email/password is empty, or the email already exists, return "400"
+  if (!req.body.email || !req.body.password) {
+    res.send(400, "Please check if you entered both email and password.");
+    return;
+  } else if (checkIfExist(req.body.email)) {
+    console.log(req.body.email, req.body.password);
+    res.send(400, "This email has been registered. Please login.");
+  } else {
+    const userID = generateRandomString();
 
-  //delete user cookie
-  app.post('/logout', (req, res) => {
-    res.clearCookie('user_id');
-    res.redirect('/urls');
-  })
-})
+    users[userID] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    //create user cookie
+    res.cookie('user_id', userID);
+    res.redirect(`/register`);
+  };
+});
+
+//delete user cookie
+app.post('/logout', (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect('/urls');
+});
+
 
 
 
@@ -141,6 +139,15 @@ const urlDatabase = {
 
 function generateRandomString() {
   return Math.random().toString(36).slice(2,8);
+};
+
+const checkIfExist = email => {
+  for (let user in users) {
+    if (users[user].email === email) {
+      return true;
+    }
+  }
+  return false;
 };
 
 //create database for user info

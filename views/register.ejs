@@ -18,21 +18,21 @@
     <body>
         
         <%- include('partials/_header') %>
-        <h2>User Registration Form</h2>
-        <br>
-        
         <div class="form-group">
-        <form style="margin: 0 auto;" action="/register" method="POST">
-            <label for="username"> Email : </label>
-            <input type="email" name="email" placeholder="Enter email as username" />
-            </br>
-            <label for="password"> Password : </label>
-            <input type="password" name="password" placeholder="Enter password" />
-            </br>
-            <button type="submit" class="btn btn-outline-primary" a href="/register"> Submit</button>
-
-        </form>
+            <form style="margin: 10px;" action="/register" method="POST">
+                <h2> Create Account </h2>
+                <label for="username"> Email address </label></br>
+                <input type="email" name="email" placeholder="Enter email as username" />
+                </br></br>
+                <label for="password"> Password </label></br>
+                <input type="password" name="password" placeholder="Enter password" />
+                </br>
+                </br>
+                <button type="submit" class="btn btn-primary" a href="/register"> Submit</button>
+    
+            </form>
         </div>
+
     
      <!-- Bootstrap JS -->
      <script
