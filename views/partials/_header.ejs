@@ -25,17 +25,13 @@
         </form>
       </div>
       <% } else { %>
-      <form action="/login" method="POST">
         <div class="form-group mb-2">
-            <button type="submit" class="btn btn-outline-dark"> Login </button>
+          <a class="nav-item nav-link" href="/login">Login</a>
           </div>
-        </form>
 
-        <form action="/register" method="POST">
           <div class="form-group mb-2">
-            <button type="submit" class="btn btn-outline-dark"> Register </button>
+            <a class="nav-item nav-link" href="/register">Register</a>
           </div>
-        </form>
       <% } %>
     </nav>
   </header>

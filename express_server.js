@@ -74,23 +74,33 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls`);
 })
 
-//user registration
+//if the user is logged in, redirect to GET /urls
 app.get("/register", (req, res) => {
-  const userID = req.cookies["user_id"];
+  // const userID = req.cookies["user_id"];
+  // const templateVars = { user: users[req.cookies['user_id']]};
+  // res.render("register", templateVars);
+  const userID = req.session["user_id"];
+  if (userID) {
+    res.redirect('/urls');
+  }
   const templateVars = { user: users[req.cookies['user_id']]};
-  res.render("register", templateVars);
+  res.render("register", templateVars)
 });
 
-//user login
+//if the user is logged in, redirect to GET /urls
 app.get("/login", (req, res) => {
+  // const templateVars = { user: users[req.cookies['user_id']]};
+  // res.render("login", templateVars);
+  const userID = req.session["user_id"];
+  if (userID) {
+    res.redirect('/urls');
+  }
   const templateVars = { user: users[req.cookies['user_id']]};
   res.render("login", templateVars);
 })
 
 //Registration handler
 app.post("/register", (req, res) => {
-  //console.log for testing
-  //console.log(users);
 
   //if email/password is empty, or the email already exists, return "400"
   if (!req.body.email || !req.body.password) {
