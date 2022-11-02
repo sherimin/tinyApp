@@ -15,7 +15,7 @@ app.set('view engine', 'ejs');
 
 //pass the URL data to template
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: users[req.cookies["user_id"]] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
 });
 
@@ -28,12 +28,12 @@ app.post("/urls", (req, res) => {
 
 //Create new urls
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: users[req.cookies["user_id"]] };
+  const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { shortURL: req.params.id, longURL: `urlDatabase`, username: users[req.cookies['user_id']]};
+  const templateVars = { shortURL: req.params.id, longURL: `urlDatabase`, user: users[req.cookies["user_id"]]};
   res.render("urls_show", templateVars);
 });
 
@@ -61,37 +61,29 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-
-//User login
-app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect(`/login`);
-})
-
 app.get("urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 })
 
 //User logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect(`/urls`);
 })
 
 //user registration
 app.get("/register", (req, res) => {
   const userID = req.cookies["user_id"];
-  const templateVars = { username: users[req.cookies['user_id']]};
+  const templateVars = { user: users[req.cookies['user_id']]};
   res.render("register", templateVars);
 });
 
 //user login
 app.get("/login", (req, res) => {
-  const templateVars = { username: users[req.cookies['user_id']]};
+  const templateVars = { user: users[req.cookies['user_id']]};
   res.render("login", templateVars);
 })
 
@@ -117,16 +109,34 @@ app.post("/register", (req, res) => {
     };
     //create user cookie
     res.cookie('user_id', userID);
-    res.redirect(`/register`);
+    res.redirect(`/urls`);
   };
 });
 
-//delete user cookie
+
+//Update the login handler
+app.post("/login", (req, res) => {
+  // const username = req.body.username;
+  // res.cookie('username', username);
+  // res.redirect(`/login`);
+
+  const inputEmail = req.body.email;
+  const inputPassword = req.body.password;
+  if(!checkIfExist(inputEmail)) {
+    res.send(403, "This email cannot be found.")
+  } else if (inputPassword !== users[userID].password) {
+    res.send(403, "Sorry, the password doesn/'t match our record.");
+  } else {
+    res.cookie('user_id', userID)
+    res.redirect('/urls');
+  }
+})
+
+//logout; delete user cookie
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
 });
-
 
 
 
