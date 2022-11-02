@@ -94,11 +94,10 @@ app.post("/register", (req, res) => {
 
   //if email/password is empty, or the email already exists, return "400"
   if (!req.body.email || !req.body.password) {
-    res.send(400, "Please check if you entered both email and password.");
-    return;
+    res.status(400).send("Please check if you entered both email and password.");
   } else if (checkIfExist(req.body.email)) {
     console.log(req.body.email, req.body.password);
-    res.send(400, "This email has been registered. Please login.");
+    res.status(400).send("This email has been registered. Please login.");
   } else {
     const userID = generateRandomString();
 
@@ -116,21 +115,23 @@ app.post("/register", (req, res) => {
 
 //Update the login handler
 app.post("/login", (req, res) => {
-  // const username = req.body.username;
-  // res.cookie('username', username);
-  // res.redirect(`/login`);
-
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
+
+  //return status code 403 if the email cannot be found, or the password doesn't match.
   if(!checkIfExist(inputEmail)) {
-    res.send(403, "This email cannot be found.")
-  } else if (inputPassword !== users[userID].password) {
-    res.send(403, "Sorry, the password doesn/'t match our record.");
+    res.status(403).send("This email cannot be found.")
   } else {
-    res.cookie('user_id', userID)
-    res.redirect('/urls');
+    const findUser = findUserbyEmail(inputEmail);
+    const userID = findUser.id;
+    if (inputPassword !== findUser.password) {
+      res.status(403).send("Sorry, the password doesn't match our record.");
+    } else {
+      res.cookie('user_id', userID);
+      res.redirect('/urls');
+    }
   }
-})
+});
 
 //logout; delete user cookie
 app.post('/logout', (req, res) => {
@@ -159,6 +160,14 @@ const checkIfExist = email => {
   }
   return false;
 };
+
+const findUserbyEmail = email => {
+  for (let user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    }
+  }
+}
 
 //create database for user info
 const users = {
