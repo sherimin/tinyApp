@@ -12,6 +12,15 @@ app.use(express.urlencoded({ extended: true }));
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
+//Add bcrypt
+const bcrypt = require("bcryptjs");
+const password = "purple-monkey-dinosaur"; // found in the req.body object
+const hashedPassword = bcrypt.hashSync(password, 10);
+
+//to check password
+//bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword); => returns true
+//bcrypt.compareSync("pink-donkey-minotaur", hashedPassword); => returns false
+
 //////////////////////////////////
 //SET UP : 
 //////////////////////////////////
@@ -223,7 +232,6 @@ app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.status(400).send("Please check if you entered both email and password.");
   } else if (checkIfExist(req.body.email)) {
-    console.log(req.body.email, req.body.password);
     res.status(400).send("This email has been registered. Please login.");
   } else {
     const userID = generateRandomString();
@@ -231,10 +239,10 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email: req.body.email,
-      password: req.body.password
+      password: bcrypt.hashSync(req.body.password)
     };
     //create user cookie
-    res.cookie('user_id', userID);
+    res.cookie('user_id', users[user_id].id);
     res.redirect(`/urls`);
   };
 });
@@ -251,7 +259,7 @@ app.post("/login", (req, res) => {
   } else {
     const findUser = findUserbyEmail(inputEmail);
     const userID = findUser.id;
-    if (inputPassword !== findUser.password) {
+    if (bcrypt.compareSync(inputPassword, findUser.password) === false) {
       res.status(403).send("Sorry, the password doesn't match our record.");
     } else {
       res.cookie('user_id', userID);
