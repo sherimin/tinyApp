@@ -4,6 +4,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
+//const { getUserbyEmail } = require('./helpers.js');
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -99,13 +101,7 @@ const checkIfExist = email => {
   return false;
 };
 
-const findUserbyEmail = email => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
-  }
-}
+
 
 const findURLsForUser = id => {
   let URLsForUser = {};
@@ -116,7 +112,17 @@ const findURLsForUser = id => {
     }
   }
   return URLsForUser;
+};
+
+const getUserbyEmail = (email, database) => {
+  //const database = users;
+    for (let user in database) {
+      if (database[user].email === email) {
+       return database[user];
+    }
+  }
 }
+
 
 
 
@@ -137,9 +143,8 @@ app.get("/urls", (req, res) => {
 //only logged-in users can shorten URLs
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
   //seems like this longURL isnt working....
-  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.body.user_id};
+  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.user_id};
 
   if (!req.session.user_id) {
     res.redirect(`/login`);
@@ -272,19 +277,26 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
+  const user = getUserbyEmail(inputEmail, users)
 
   //return status code 403 if the email cannot be found, or the password doesn't match.
-  if(!checkIfExist(inputEmail)) {
+  if(!user) {
     res.status(403).send("This email cannot be found.")
+  } else if (!bcrypt.compareSync(inputPassword, user.password)) {
+    // const findUser = getUserbyEmail(inputEmail);
+    // console.log('findUser : ', findUser);
+    // const userID = findUser.id;
+    // console.log('userID', userID);
+    // if (bcrypt.compareSync(inputPassword, hashedPassword) === false) {
+    //   res.status(403).send("Sorry, the password doesn't match our record.");
+    // } else {
+    //   res.cookie('user_id', userID);
+    //   res.redirect('/urls');
+    // }
+    res.status(403).send("Sorry, the password doesn't match our record.");
   } else {
-    const findUser = findUserbyEmail(inputEmail);
-    const userID = findUser.id;
-    if (bcrypt.compareSync(inputPassword, hashedPassword) === false) {
-      res.status(403).send("Sorry, the password doesn't match our record.");
-    } else {
-      res.cookie('user_id', userID);
-      res.redirect('/urls');
-    }
+    res.cookie('user_id', userID);
+    res.redirect('/urls');
   }
 });
 
