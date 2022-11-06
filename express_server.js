@@ -121,11 +121,7 @@ const getUserbyEmail = (email, database) => {
        return database[user];
     }
   }
-}
-
-
-
-
+};
 
 
 
@@ -143,7 +139,6 @@ app.get("/urls", (req, res) => {
 //only logged-in users can shorten URLs
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  //seems like this longURL isnt working....
   urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.user_id};
 
   if (!req.session.user_id) {
@@ -167,7 +162,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.shortURL], user: req.session.user_id};
+  const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: req.session.user_id};
+
   res.render("urls_show", templateVars);
 });
 
@@ -225,9 +221,7 @@ app.post("/logout", (req, res) => {
 
 //if the user is logged in, redirect to GET /urls
 app.get("/register", (req, res) => {
-  // const userID = req.cookies["user_id"];
-  //const templateVars = { user: users[req.cookies['user_id']]};
-  // res.render("register", templateVars);
+
   const userID = req.session.user_id;
   if (userID) {
     res.redirect('/urls');
@@ -238,15 +232,11 @@ app.get("/register", (req, res) => {
 
 //if the user is logged in, redirect to GET /urls
 app.get("/login", (req, res) => {
-  // const templateVars = { user: users[req.cookies['user_id']]};
-  // res.render("login", templateVars);
-  // const userID = req.signedCookies["user_id"];
-
-  const templateVars = { user: users[req.session.user_id]};
-
-  if (templateVars.user) {
+  const userID = req.session.user_id;
+  if (userID) {
     res.redirect('/urls');
   }
+  const templateVars = { user: users[req.session.user_id]};
   res.render("login", templateVars);
 })
 
@@ -264,10 +254,13 @@ app.post("/register", (req, res) => {
     users[userID] = {
       id: userID,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password)
+      password: hashedPassword
     };
+
+    console.log(users[userID]);
     //create user cookie
-    res.cookie('user_id', users[userID].id);
+    //res.cookie('user_id', users[userID].id);
+    req.session.user_id = users[userID].id;
     res.redirect(`/urls`);
   };
 });
@@ -283,19 +276,10 @@ app.post("/login", (req, res) => {
   if(!user) {
     res.status(403).send("This email cannot be found.")
   } else if (!bcrypt.compareSync(inputPassword, user.password)) {
-    // const findUser = getUserbyEmail(inputEmail);
-    // console.log('findUser : ', findUser);
-    // const userID = findUser.id;
-    // console.log('userID', userID);
-    // if (bcrypt.compareSync(inputPassword, hashedPassword) === false) {
-    //   res.status(403).send("Sorry, the password doesn't match our record.");
-    // } else {
-    //   res.cookie('user_id', userID);
-    //   res.redirect('/urls');
-    // }
     res.status(403).send("Sorry, the password doesn't match our record.");
   } else {
-    res.cookie('user_id', userID);
+    //res.cookie('user_id', userID);
+    req.session.user_id = user.id;
     res.redirect('/urls');
   }
 });
@@ -303,7 +287,7 @@ app.post("/login", (req, res) => {
 //logout; delete user cookie
 app.post('/logout', (req, res) => {
   //res.clearCookie('user_id');
-  res.clearCookie('session');
+  req.session('user_id') = null;
   res.redirect('/urls');
 });
 
