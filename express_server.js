@@ -26,10 +26,6 @@ const bcrypt = require("bcryptjs");
 const password = "purple-monkey-dinosaur"; // found in the req.body object
 const hashedPassword = bcrypt.hashSync(password, 10);
 
-//to check password
-//bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword); => returns true
-//bcrypt.compareSync("pink-donkey-minotaur", hashedPassword); => returns false
-
 //////////////////////////////////
 //SET UP : 
 //////////////////////////////////
@@ -115,7 +111,6 @@ const findURLsForUser = id => {
 };
 
 const getUserbyEmail = (email, database) => {
-  //const database = users;
     for (let user in database) {
       if (database[user].email === email) {
        return database[user];
@@ -179,9 +174,7 @@ app.get('/u/:shortURL', (req, res) => {
 //to update a longURL resource
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  // const longURL = req.body.longURL;
-  // urlDatabase[shortURL] = longURL;
-  // res.redirect(`/urls/${shortURL}`);
+
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect(`/urls/${shortURL}`);
@@ -258,8 +251,6 @@ app.post("/register", (req, res) => {
     };
 
     console.log(users[userID]);
-    //create user cookie
-    //res.cookie('user_id', users[userID].id);
     req.session.user_id = users[userID].id;
     res.redirect(`/urls`);
   };
@@ -278,7 +269,6 @@ app.post("/login", (req, res) => {
   } else if (!bcrypt.compareSync(inputPassword, user.password)) {
     res.status(403).send("Sorry, the password doesn't match our record.");
   } else {
-    //res.cookie('user_id', userID);
     req.session.user_id = user.id;
     res.redirect('/urls');
   }
@@ -286,7 +276,6 @@ app.post("/login", (req, res) => {
 
 //logout; delete user cookie
 app.post('/logout', (req, res) => {
-  //res.clearCookie('user_id');
   req.session('user_id') = null;
   res.redirect('/urls');
 });
