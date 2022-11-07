@@ -4,7 +4,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-//const { getUserbyEmail } = require('./helpers.js');
+const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require('./helpers.js');
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
