@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-//const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require('./helpers.js');
+//const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require("./helpers");
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,8 +22,7 @@ app.set('view engine', 'ejs');
 
 //Add bcrypt
 const bcrypt = require("bcryptjs");
-const password = "purple-monkey-dinosaur"; // found in the req.body object
-const hashedPassword = bcrypt.hashSync(password, 10);
+
 
 //////////////////////////////////
 //SET UP : 
@@ -126,6 +125,7 @@ const getUserbyEmail = (email, database) => {
 //pass the URL data to template
 app.get("/urls", (req, res) => {
   const templateVars = { urls: findURLsForUser(req.session.user_id), user: req.session.user_id };
+
   res.render("urls_index", templateVars);
 });
 
@@ -136,7 +136,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.user_id};
 
   if (!req.session.user_id) {
-    res.redirect(`/login`);
+    res.send('Only logged in users are allowed to shorten URLs.')
   }
   res.redirect(`/urls/${shortURL}`);
 });
@@ -155,20 +155,39 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+//is the below codes duplicate...???
+
 app.get("/urls/:id", (req, res) => {
   const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: req.session.user_id};
+  console.log('req.params.id : ', req.params.id, ';urlDatabase[req.params.id].longURL : ', urlDatabase[req.params.id].longURL)
 
   res.render("urls_show", templateVars);
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (longURL) {
-    res.redirect(urlDatabase[req.params.shortURL]);
+  //const longURL = urlDatabase[req.params.shortURL].longURL;
+  console.log('req.params.shortURL : ', req.params.shortURL, ';urlDatabase[req.params.shortURL].longURL : ', urlDatabase[req.params.shortURL].longURL)
+  if (urlDatabase[req.params.shortURL].longURL) {
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
     res.send(`The URL does not exist.`)
   }
 })
+
+// app.get('/u/:shortURL', (req, res) => {
+//   const shortURL = req.params.shortURL;
+//   const userID = req.session.user_id;
+
+//   const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: req.session.user_id};
+
+//   if (!urlDatabase[shortURL]) {
+//     res.send(`The URL does not exist.`)
+//   } else if (!userID) {
+//     res.send(`Sorry, only logged in users have access to this URL.`)
+//   } else {
+//     res.render("urls_show", templateVars)
+//   }
+// })
 
 //to update a longURL resource
 app.post("/urls/:shortURL", (req, res) => {
@@ -219,10 +238,11 @@ app.get("/register", (req, res) => {
 //if the user is logged in, redirect to GET /urls
 app.get("/login", (req, res) => {
   const userID = req.session.user_id;
+
   if (userID) {
     res.redirect('/urls');
   }
-  const templateVars = { user: users[req.session.user_id]};
+  const templateVars = { user: users[req.session.user_id] };
   res.render("login", templateVars);
 })
 
@@ -236,7 +256,8 @@ app.post("/register", (req, res) => {
     res.status(400).send("This email has been registered. Please login.");
   } else {
     const userID = generateRandomString();
-
+    
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
     users[userID] = {
       id: userID,
       email: req.body.email,
@@ -260,6 +281,7 @@ app.post("/login", (req, res) => {
   if(!user) {
     res.status(403).send("This email cannot be found.")
   } else if (!bcrypt.compareSync(inputPassword, user.password)) {
+
     res.status(403).send("Sorry, the password doesn't match our record.");
   } else {
     req.session.user_id = user.id;
