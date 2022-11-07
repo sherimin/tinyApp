@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-//const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require("./helpers");
+const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require("./helpers");
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -82,39 +82,6 @@ const urlDatabase = {
   },
 }
 
-function generateRandomString() {
-  return Math.random().toString(36).slice(2,8);
-};
-
-const checkIfExist = email => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return true;
-    }
-  }
-  return false;
-};
-
-
-
-const findURLsForUser = id => {
-  let URLsForUser = {};
-  for (let shortURL in urlDatabase) {
-    let userID = urlDatabase[shortURL].userID;
-    if (userID === id) {
-      URLsForUser[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return URLsForUser;
-};
-
-const getUserbyEmail = (email, database) => {
-    for (let user in database) {
-      if (database[user].email === email) {
-       return database[user];
-    }
-  }
-};
 
 
 
@@ -166,7 +133,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   //const longURL = urlDatabase[req.params.shortURL].longURL;
-  console.log('req.params.shortURL : ', req.params.shortURL, ';urlDatabase[req.params.shortURL].longURL : ', urlDatabase[req.params.shortURL].longURL)
+  //console.log('req.params.shortURL : ', req.params.shortURL, ';urlDatabase[req.params.shortURL].longURL : ', urlDatabase[req.params.shortURL].longURL)
   if (urlDatabase[req.params.shortURL].longURL) {
     res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
@@ -174,20 +141,6 @@ app.get('/u/:shortURL', (req, res) => {
   }
 })
 
-// app.get('/u/:shortURL', (req, res) => {
-//   const shortURL = req.params.shortURL;
-//   const userID = req.session.user_id;
-
-//   const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: req.session.user_id};
-
-//   if (!urlDatabase[shortURL]) {
-//     res.send(`The URL does not exist.`)
-//   } else if (!userID) {
-//     res.send(`Sorry, only logged in users have access to this URL.`)
-//   } else {
-//     res.render("urls_show", templateVars)
-//   }
-// })
 
 //to update a longURL resource
 app.post("/urls/:shortURL", (req, res) => {
@@ -281,6 +234,8 @@ app.post("/login", (req, res) => {
   if(!user) {
     res.status(403).send("This email cannot be found.")
   } else if (!bcrypt.compareSync(inputPassword, user.password)) {
+    console.log(inputPassword, user.password)
+    console.log(bcrypt.compareSync(inputPassword, user.password))
 
     res.status(403).send("Sorry, the password doesn't match our record.");
   } else {

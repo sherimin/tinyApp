@@ -1,4 +1,28 @@
+const urlDatabase = {
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userExampleID"
+  },
 
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "userExampleID",
+  },
+};
+
+const users = {
+  userExample: {
+    id: "userExampleID",
+    email: "user@example.com",
+    password: "example",
+  },
+
+  userTwoExample: {
+    id: "userTwoExample",
+    email: "user2@example.com",
+    password: "Example",
+  },
+};
 
 function generateRandomString() {
   return Math.random().toString(36).slice(2,8);
@@ -28,7 +52,6 @@ const findURLsForUser = id => {
 
 
 const getUserbyEmail = (email, database) => {
-  //const database = users;
     for (let user in database) {
       if (database[user].email === email) {
         return database[user];
