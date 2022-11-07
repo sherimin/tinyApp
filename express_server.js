@@ -1,10 +1,9 @@
 const express = require("express");
-//const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require('./helpers.js');
+//const { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail } = require('./helpers.js');
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -206,12 +205,6 @@ app.get("urls/new", (req, res) => {
   res.render("login", templateVars);
 })
 
-//User logout
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect(`/urls`);
-})
-
 //if the user is logged in, redirect to GET /urls
 app.get("/register", (req, res) => {
 
@@ -250,7 +243,7 @@ app.post("/register", (req, res) => {
       password: hashedPassword
     };
 
-    console.log(users[userID]);
+    //console.log(users[userID]);
     req.session.user_id = users[userID].id;
     res.redirect(`/urls`);
   };
@@ -276,7 +269,7 @@ app.post("/login", (req, res) => {
 
 //logout; delete user cookie
 app.post('/logout', (req, res) => {
-  req.session('user_id') = null;
+  req.session = null;
   res.redirect('/urls');
 });
 
