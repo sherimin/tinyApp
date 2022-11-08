@@ -1,52 +1,22 @@
-const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userExampleID"
-  },
-
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "userExampleID",
-  },
-};
-
-const users = {
-  userExample: {
-    id: "userExampleID",
-    email: "user@example.com",
-    password: "example",
-  },
-
-  userTwoExample: {
-    id: "userTwoExample",
-    email: "user2@example.com",
-    password: "Example",
-  },
-};
-
 function generateRandomString() {
   return Math.random().toString(36).slice(2,8);
 };
 
-const checkIfExist = email => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return true;
-    }
-  }
-  return false;
-};
 
 
-
-const findURLsForUser = id => {
+const findURLsForUser = (urlDatabase, id) => {
+  console.log('\n*** userID = ', id)
+  console.log(urlDatabase);
   let URLsForUser = {};
   for (let shortURL in urlDatabase) {
-    let userID = urlDatabase[shortURL].userID;
-    if (userID === id) {
-      URLsForUser[shortURL] = urlDatabase[shortURL];
+    const url = urlDatabase[shortURL]
+    console.log('url = ', url)
+    if (url.userID === id) {
+      console.log('add new url', url);
+      URLsForUser[shortURL] = url;
     }
   }
+  console.log('find = ', URLsForUser, '\n***\n')
   return URLsForUser;
 };
 
@@ -61,4 +31,4 @@ const getUserbyEmail = (email, database) => {
   
   
 
-module.exports = { generateRandomString, checkIfExist, findURLsForUser, getUserbyEmail }
+module.exports = { generateRandomString, findURLsForUser, getUserbyEmail }
