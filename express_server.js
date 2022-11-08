@@ -28,10 +28,6 @@ const bcrypt = require("bcryptjs");
 //SET UP : 
 //////////////////////////////////
 
-//Server Listen
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
@@ -62,13 +58,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-
-//original database
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 //updated database with URLs belonging to users
 const urlDatabase = {
   b2xVn2: {
@@ -83,8 +72,6 @@ const urlDatabase = {
 }
 
 
-
-
 //////////////////////////////////
 //Routing
 //////////////////////////////////
@@ -92,7 +79,6 @@ const urlDatabase = {
 //pass the URL data to template
 app.get("/urls", (req, res) => {
   const templateVars = { urls: findURLsForUser(req.session.user_id), user: req.session.user_id };
-
   res.render("urls_index", templateVars);
 });
 
@@ -122,20 +108,34 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-//is the below codes duplicate...???
-
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: req.session.user_id};
-  console.log('req.params.id : ', req.params.id, ';urlDatabase[req.params.id].longURL : ', urlDatabase[req.params.id].longURL)
+  const shortURL = req.params.id;
+  const userID = req.session.user_id;
 
-  res.render("urls_show", templateVars);
+  if (userID) {
+    findURLsForUser(userID, urlDatabase);
+  } else {
+    res.send("Please log in to see URLs.")
+  }
+
+  if (!urlDatabase[shortURL]) {
+    res.send('The URL does not exist.')
+  }
+    
+  const templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: req.session.user_id};
+
+  if (userID === urlDatabase[templateVars.shortURL].userID) {
+    res.render("urls_show", templateVars);
+  } else {
+    res.send(`Only the creator has access to this URL.`)
+  }
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  //const longURL = urlDatabase[req.params.shortURL].longURL;
-  //console.log('req.params.shortURL : ', req.params.shortURL, ';urlDatabase[req.params.shortURL].longURL : ', urlDatabase[req.params.shortURL].longURL)
-  if (urlDatabase[req.params.shortURL].longURL) {
-    res.redirect(urlDatabase[req.params.shortURL].longURL);
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  
+  if (urlDatabase[req.params.shortURL]) {
+    res.redirect(`https://${longURL}`);
   } else {
     res.send(`The URL does not exist.`)
   }
@@ -166,16 +166,16 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 });
 
-app.get("urls/new", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies["user_id"]],
-    urls: urlDatabase
-  };
-  if (templateVars.user) {
-    res.render("urls_index", templateVars)
-  }
-  res.render("login", templateVars);
-})
+// app.get("urls/new", (req, res) => {
+//   const templateVars = {
+//     user: users[req.cookies["user_id"]],
+//     urls: urlDatabase
+//   };
+//   if (templateVars.user) {
+//     res.render("urls_index", templateVars)
+//   }
+//   res.render("login", templateVars);
+// })
 
 //if the user is logged in, redirect to GET /urls
 app.get("/register", (req, res) => {
@@ -248,6 +248,11 @@ app.post("/login", (req, res) => {
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/urls');
+});
+
+//Server Listen
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
 
 
