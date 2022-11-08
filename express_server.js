@@ -100,10 +100,11 @@ app.post("/urls", (req, res) => {
 
 //Create new urls
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    user: req.session.user_id,
-    urls: urlDatabase
-  };
+  const id = req.session.user_id;
+  const user = users[id];
+  const urls = findURLsForUser(urlDatabase, id);
+  const templateVars = { urls, user};
+
 
   if (templateVars.user) {
     res.render("urls_new", templateVars);
@@ -115,8 +116,9 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const userID = req.session.user_id;
-
+  const user = users[userID];
   const url = urlDatabase[shortURL];
+
   if (!url) {
     res.send('The URL does not exist.')
   }
@@ -125,7 +127,7 @@ app.get("/urls/:id", (req, res) => {
     return res.send(`Only the creator has access to this URL.`)
 
   } 
-  const templateVars = { shortURL: req.params.id, longURL: url.longURL, user: req.session.user_id };
+  const templateVars = { shortURL: req.params.id, longURL: url.longURL, user, userID };
   res.render("urls_show", templateVars);
 
 });
@@ -156,7 +158,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //to remove a URL resource and redirect to index page
 app.post("/urls/:id/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
+  const shortURL = req.params.id;
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[req.params.id];
     res.redirect(`/urls`);
