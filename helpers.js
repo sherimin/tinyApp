@@ -5,18 +5,14 @@ function generateRandomString() {
 
 
 const findURLsForUser = (urlDatabase, id) => {
-  console.log('\n*** userID = ', id)
-  console.log(urlDatabase);
+
   let URLsForUser = {};
   for (let shortURL in urlDatabase) {
     const url = urlDatabase[shortURL]
-    console.log('url = ', url)
     if (url.userID === id) {
-      console.log('add new url', url);
       URLsForUser[shortURL] = url;
     }
   }
-  console.log('find = ', URLsForUser, '\n***\n')
   return URLsForUser;
 };
 

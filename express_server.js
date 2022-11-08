@@ -88,15 +88,12 @@ app.get("/urls", (req, res) => {
 //Generate short URLs and redirect
 //only logged-in users can shorten URLs
 app.post("/urls", (req, res) => {
-  console.log('creating new : !!!!')
   if (!req.session.user_id) {
     return res.send('Only logged in users are allowed to shorten URLs.')
   }
 
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
-  console.log(urlDatabase);
-
 
   res.redirect(`/urls/${shortURL}`);
 });
@@ -212,7 +209,6 @@ app.post("/register", (req, res) => {
       password: hashedPassword
     };
 
-    //console.log(users[userID]);
     req.session.user_id = users[userID].id;
     res.redirect(`/urls`);
   };
@@ -231,9 +227,6 @@ app.post("/login", (req, res) => {
   }
 
   if (!bcrypt.compareSync(inputPassword, user.password)) {
-    console.log(inputPassword, user.password)
-    console.log(bcrypt.compareSync(inputPassword, user.password))
-
     return res.status(403).send("Sorry, the password doesn't match our record.");
   }
 
