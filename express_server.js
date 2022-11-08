@@ -166,16 +166,6 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 });
 
-// app.get("urls/new", (req, res) => {
-//   const templateVars = {
-//     user: users[req.cookies["user_id"]],
-//     urls: urlDatabase
-//   };
-//   if (templateVars.user) {
-//     res.render("urls_index", templateVars)
-//   }
-//   res.render("login", templateVars);
-// })
 
 //if the user is logged in, redirect to GET /urls
 app.get("/register", (req, res) => {
