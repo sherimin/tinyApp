@@ -50,7 +50,7 @@ const users = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/login');
 });
 
 //turn responses to JSON
@@ -82,14 +82,23 @@ app.get("/urls", (req, res) => {
   const user = users[id];
   const urls = findURLsForUser(urlDatabase, id);
   const templateVars = { urls, user };
+  if (!id) {
+    const message = 'Please log in to see URLs.'
+    const templateVars = { message, urls, user };
+    return res.render("error", templateVars);
+  }
+
   res.render("urls_index", templateVars);
 });
 
 //Generate short URLs and redirect
 //only logged-in users can shorten URLs
 app.post("/urls", (req, res) => {
-  if (!req.session.user_id) {
-    return res.send('Only logged in users are allowed to shorten URLs.')
+  const id = req.session.user_id;
+  if (!id) {
+    const message = 'Please log in to see URLs.'
+    const templateVars = { message };
+    return res.render("error", templateVars);
   }
 
   const shortURL = generateRandomString();
@@ -133,13 +142,13 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
 
-  if (urlDatabase[req.params.shortURL]) {
-    res.redirect(`https://${longURL}`);
-  } else {
-    res.send(`The URL does not exist.`)
+  if (!urlDatabase[shortURL]) {
+    return res.send(`The URL does not exist.`)
   }
+  res.redirect(longURL);
 })
 
 
@@ -239,7 +248,7 @@ app.post("/login", (req, res) => {
 //logout; delete user cookie
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 //Server Listen
